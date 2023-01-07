@@ -65,6 +65,7 @@ public class DashboardActivity extends AppCompatActivity {
                                 return true;
                             }
 
+                            // show an alert dialog to confirm the delete action
                             @Override
                             public void onDismiss(ListView listView, int[] reverseSortedPositions) {
                                 // delete the todo
