@@ -3,6 +3,7 @@ package xyz.rudra0x01.todoapp;
 import android.content.Intent;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -10,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import xyz.rudra0x01.todoapp.EditTodoDialogFragment.EditTodoDialogFragment;
 import xyz.rudra0x01.todoapp.database.databaseConnect;
 import xyz.rudra0x01.todoapp.extensions.SwipeDismissListViewTouchListener;
 import xyz.rudra0x01.todoapp.session.LoginPreferences;
@@ -86,6 +88,24 @@ public class DashboardActivity extends AppCompatActivity {
 
         // set the touch listener
         todoListView.setOnTouchListener(touchListener);
+
+        todoListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                String todoName = (String) todoListView.getAdapter().getItem(i);
+                EditTodoDialogFragment editTodoDialogFragment = EditTodoDialogFragment.newInstance(todoName, todoListView);
+
+                // Create a new Bundle to store the todoName text
+                Bundle args = new Bundle();
+                args.putString("todo_name", todoName);
+
+                // Set the arguments on the EditTodoDialogFragment
+                editTodoDialogFragment.setArguments(args);
+
+                // Show the EditTodoDialogFragment
+                editTodoDialogFragment.show(getSupportFragmentManager(), "edit_todo_dialog");
+            }
+        });
 
         LoginPreferences loginPreferences = new LoginPreferences(getApplicationContext());
 

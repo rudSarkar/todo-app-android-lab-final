@@ -6,6 +6,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
@@ -159,16 +160,14 @@ public class databaseConnect extends SQLiteOpenHelper {
     }
 
     // update todo item
-    public void updateTodoItem(int id, String todoName) {
+    public void updateTodoItem(String todoName, String oldTodoName) {
         // get writable database
         SQLiteDatabase db = this.getWritableDatabase();
 
-        // create content values to update
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_TODO_NAME, todoName);
+        String query = "UPDATE " + TABLE_TODO_LIST + " SET " + COLUMN_TODO_NAME + " = '" + todoName + "' WHERE " + COLUMN_TODO_NAME + " = '" + oldTodoName + "'";
 
-        // update row
-        db.update(TABLE_TODO_LIST, values, COLUMN_TODO_ID + " = ?", new String[]{String.valueOf(id)});
+        Log.d("sql_update_query", query);
+        db.execSQL(query);
 
         // close db connection
         db.close();
