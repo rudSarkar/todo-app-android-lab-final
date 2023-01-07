@@ -15,6 +15,7 @@ import xyz.rudra0x01.todoapp.extensions.SwipeDismissListViewTouchListener;
 import xyz.rudra0x01.todoapp.session.LoginPreferences;
 import xyz.rudra0x01.todoapp.AddTodoDialog.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DashboardActivity extends AppCompatActivity {
@@ -37,16 +38,20 @@ public class DashboardActivity extends AppCompatActivity {
         // TODO: get the username/email intent data
         mUsername = getIntent().getStringExtra(USERNAME_KEY);
 
-        // get the todo list from the database
-        databaseConnect databaseConnect = new databaseConnect(this);
-        List<String> todoList = databaseConnect.getTodoList();
-
-// create an array adapter
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, todoList);
+        // create a databaseConnect instance
+        databaseConnect dbHelper = new databaseConnect(getApplicationContext());
 
 
-        // set the adapter as the data source for the list view
+        // show todo list
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, new ArrayList<String>());
         todoListView.setAdapter(adapter);
+
+        List<String> todoList = dbHelper.getTodoList();
+
+        // update the ArrayAdapter with the new data
+        adapter.clear();
+        adapter.addAll(todoList);
+        adapter.notifyDataSetChanged();
 
         // create the touch listener
         SwipeDismissListViewTouchListener touchListener =
@@ -61,25 +66,25 @@ public class DashboardActivity extends AppCompatActivity {
                             @Override
                             public void onDismiss(ListView listView, int[] reverseSortedPositions) {
                                 // delete the todo
-                                int position = 0;
+                                int position = reverseSortedPositions[0];
                                 String todoName = (String) listView.getAdapter().getItem(position);
 
                                 try {
-                                    databaseConnect.deleteTodoItem(todoName);
+                                    dbHelper.deleteTodoItem(todoName);
                                     Toast.makeText(getApplicationContext(), "Todo Deleted", Toast.LENGTH_LONG).show();
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
 
                                 // refresh the todo list
-                                List<String> todoList = databaseConnect.getTodoList();
+                                List<String> todoList = dbHelper.getTodoList();
                                 ((ArrayAdapter) todoListView.getAdapter()).clear();
                                 ((ArrayAdapter) todoListView.getAdapter()).addAll(todoList);
                                 ((ArrayAdapter) todoListView.getAdapter()).notifyDataSetChanged();
                             }
                         });
 
-// set the touch listener
+        // set the touch listener
         todoListView.setOnTouchListener(touchListener);
 
         LoginPreferences loginPreferences = new LoginPreferences(getApplicationContext());
@@ -89,8 +94,8 @@ public class DashboardActivity extends AppCompatActivity {
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.menu_add:
-                        AddTodoDialogFragment dialog = new AddTodoDialogFragment();
-                        dialog.show(getSupportFragmentManager(), "add_todo_dialog");
+                        AddTodoDialogFragment addTodoDialogFragment = AddTodoDialogFragment.newInstance(todoListView);
+                        addTodoDialogFragment.show(getSupportFragmentManager(), "add_todo_dialog");
                         return true;
                     case R.id.menu_logout:
                         loginPreferences.logout(DashboardActivity.this);

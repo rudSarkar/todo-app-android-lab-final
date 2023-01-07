@@ -5,14 +5,23 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Toast;
+import android.widget.*;
 import androidx.fragment.app.DialogFragment;
 import xyz.rudra0x01.todoapp.R;
 import xyz.rudra0x01.todoapp.database.databaseConnect;
 
+import java.util.List;
+
 public class AddTodoDialogFragment extends DialogFragment {
+
+    private ListView mTodoListView;
+
+    public static AddTodoDialogFragment newInstance(ListView todoListView) {
+        AddTodoDialogFragment fragment = new AddTodoDialogFragment();
+        fragment.mTodoListView = todoListView;
+        return fragment;
+    }
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // create the dialog
@@ -36,11 +45,20 @@ public class AddTodoDialogFragment extends DialogFragment {
                     databaseConnect databaseConnect = new databaseConnect(getActivity());
                     databaseConnect.insertTodoItem(todoName);
                     Toast.makeText(getContext(), "Todo added", Toast.LENGTH_LONG).show();
+
+                    // refresh the todo list
+                    List<String> todoList = databaseConnect.getTodoList();
+                    ((ArrayAdapter) mTodoListView.getAdapter()).clear();
+                    ((ArrayAdapter) mTodoListView.getAdapter()).addAll(todoList);
+                    ((ArrayAdapter) mTodoListView.getAdapter()).notifyDataSetChanged();
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         });
+
+
         builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
